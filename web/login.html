@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>登录页面</title>
+  <link rel="stylesheet" href="../css/layui.css" media="all">
+  <style>
+  body{margin: 10px;}
+  .background{background: grey;background-image: url(images/login_bg.jpg);
+    background-size:cover;}
+    .formDiv{ width:400px ;background: white;
+      padding-top: 20px; padding-bottom: 20px;
+      padding-left: 20px;padding-right: 20px;
+      margin:0px auto;
+      margin-top: 200px;
+      border-radius:5px;
+    }
+    .title{
+      font-size: 40px;
+    }
+  </style>
+</head>
+<body class="background">
+  <div class="formDiv">
+    <form class="layui-form" action="">
+      <div class="layui-form-item">
+        <label class="layui-title title"> 欢迎使用订单管理系统</label>
+
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label layui-icon layui-icon-username"> 用户名</label>
+        <div class="layui-input-inline">
+          <input type="text" name="username" required  lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-form-mid layui-word-aux">zzy</div>
+      </div>
+
+      <div class="layui-form-item">
+        <label class="layui-form-label layui-icon layui-icon-password"> 密码</label>
+        <div class="layui-input-inline">
+          <input type="password" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-form-mid layui-word-aux">zzy</div>
+      </div>
+
+      <div class="layui-form-item">
+        <div class="layui-input-block">
+          <button class="layui-btn layui-btn-radius layui-btn-normal" lay-submit lay-filter="login">立即提交</button>
+          <button type="reset" class="layui-btn  layui-btn-radius layui-btn-primary">重置</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  
+  <script src="../layui.js"></script>
+  <script>
+//     layui.config({base: '../js/'}).extend({
+//                 jquery_cookie: 'extends/jquery.cookie' 
+//                 // 默认寻找base也就是js/index.js模块导入
+//             });
+//     layui.define(['jquery', 'jquery_cookie'], function (exports) {
+//     var $ = layui.jquery;  
+//     // 可能需要导入多个扩展插件
+//     $ = layui.jquery_cookie($);
+    
+//     // 尝试使用jquery.cookie.js
+//     $.cookie('name', 'limanman');
+    
+//     alert($.cookie('name'));
+
+//     // 作为入口无需注册模块,所以直接null
+//     exports('index', null);
+// });
+
+//Demo
+layui.use(['form,layer'], function(){
+  var form = layui.form
+  ,layer = layui.layer;
+  $ = layui.jquery;
+  // $ = layui.jquery_cookie($);
+  // // 尝试使用jquery.cookie.js
+  // $.cookie('name', 'limanman');
+  
+  // alert($.cookie('name'));
+
+  
+  //监听提交
+  form.on('submit(login)', function(data){
+    // layer.msg(JSON.stringify(data.field));
+    // layer.msg(data.field.username)
+
+    if(data.field.username === 'zzy' && data.field.password === 'zzy'){
+      $.ajax({url:'https://www.layui.com/demo/table/user/',       
+        method:'get',       
+        data:data.field,        
+        dataType:'JSON',         
+        success:function(res){       
+          if(res.code='0'){
+            layer.msg('登录成功'); 
+            location.href="main.html";  
+            $.cookie('the_cookie','1234567890');
+      layer.msg('cookie='+$.cookie('the_cookie'));    
+            parent.closeIframe(res.msg);
+          }                
+          else{    
+            layer.msg('登录失败');  
+            alert(res.msg);   
+          }
+        },              
+        error:function (data){}           
+      }); 
+      layer.msg('登录成功');     
+    }else{
+      layer.msg('用户名密码错误');
+    }
+
+    return false;
+  });
+});
+</script>
+</body>
+</html>        
