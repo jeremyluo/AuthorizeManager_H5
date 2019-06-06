@@ -4,11 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <title>首页</title>
-    <link rel="stylesheet" href="../css/layui.css" media="all">
+    <link rel="stylesheet" href="../layui/css/layui.css" media="all">
     <style>
       body{margin: 10px;}
       .background{height: 200px; line-height: 200px; text-align: center;}
       .formback{}
+      .liselected{display:block;padding:0 20px;color:#fff;color:rgba(255,255,255,.7);
+        transition:all .3s;-webkit-transition:all .3s}
     </style>
   </head>
   <body class="layui-layout-body">
@@ -19,7 +21,7 @@
       <ul class="layui-nav layui-layout-left">
         <li class="layui-nav-item"><a href="">订单列表</a></li>
         <li class="layui-nav-item"><a href="">商品管理</a></li>
-        <li class="layui-nav-item"><a href="">用户管理</a></li>
+        <li class="layui-nav-item layui-nav-itemed "><a href="">用户管理</a></li>
         <li class="layui-nav-item"><a href="">数据上传</a></li>
         <li class="layui-nav-item">
           <a href="javascript:;">其它系统</a>
@@ -82,8 +84,7 @@
     </div>
   </div>
 
-    
-  <script src="../layui.js"></script>
+  <script src="../layui/layui.js"></script>
   <script>
   //JavaScript代码区域
   layui.use(['element','form', 'table'], function(){

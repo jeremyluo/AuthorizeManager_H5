@@ -1,0 +1,92 @@
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>客户新增</title>
+    <link rel="stylesheet" href="../layui/css/layui.css" media="all">
+    <style>
+      body{margin: 10px;}
+      .background{height: 200px; line-height: 200px; text-align: center;}
+      .formback{}
+      .liselected{display:block;padding:0 20px;color:#fff;color:rgba(255,255,255,.7);
+        transition:all .3s;-webkit-transition:all .3s}
+    </style>
+  </head>
+  <body class="layui-layout-body">
+    
+    <form class="layui-form" action="">
+      <div class="layui-form" lay-filter="customerAdd" id="customerAdd">
+        <div class="layui-form-item">
+          <label class="layui-form-label">客户名称</label>
+          <div class="layui-input-inline">
+            <input type="text" name="customerName" lay-verify="required" id="customerName" placeholder="请输入客户名称" autocomplete="off" class="layui-input">
+          </div>
+        </div>
+        <div class="layui-form-item">
+        <div class="layui-input-block">
+          <button class="layui-btn layui-btn-radius layui-btn-normal" lay-submit lay-filter="customerAdd">新增</button>
+          <button type="reset" class="layui-btn  layui-btn-radius layui-btn-primary">重置</button>
+        </div>
+      </div>
+      </div>
+    </form>
+    
+  <script src="js/common.js"></script>
+  <script src="../layui/layui.js"></script>
+  <script>
+  //JavaScript代码区域
+  layui.config({base: '../res/js/'}).extend({
+    cookie: 'module/cookie' 
+  });
+    layui.use(['element','form','layer', 'jquery', 'cookie'], function(){
+      var element = layui.element
+      ,form = layui.form
+      ,layer = layui.layer
+      ,$ = layui.jquery
+      ,cookie = layui.cookie;
+      // layer.msg('cookie='+$.cookie('the_cookie'));
+      // 
+      //监听提交
+      form.on('submit(customerAdd)', function(data){
+      $.ajax({url:urlCustomerAdd,       
+        method:'post',       
+        data:data.field,        
+        dataType:'JSON',  
+        timeout:3000,
+        beforeSend:function(){
+            $(".loading-box").show();
+        },
+        complete:function(){
+            $(".loading-box").hide();
+        },       
+        success:function(res){       
+          if(res.code='0'){
+            layer.msg('添加客户成功'); 
+            parent.closeIframe(res.msg);
+          }                
+          else{    
+            layer.msg('添加客户失败,msg='+res.errorMessage);  
+            alert(res.msg);   
+          }
+        },  
+        //调用执行后调用的函数
+        complete: function (XMLHttpRequest, textStatus) {
+            if(textStatus == 'timeout'){
+                layer.msg('接口超时');
+                // parent.closeIframe('');
+                var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                parent.layer.close(index); //再执行关闭
+            }
+        },            
+        error:function (data){
+          layer.msg('操作失败');
+        }           
+      }); 
+        return false;
+      });
+    });
+  </script>
+  </body>
+  </html>        
+          

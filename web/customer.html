@@ -3,12 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <title>订单列表</title>
+    <title>客户管理</title>
     <link rel="stylesheet" href="../layui/css/layui.css" media="all">
     <style>
       body{margin: 10px;}
       .background{height: 200px; line-height: 200px; text-align: center;}
       .formback{}
+      .liselected{display:block;padding:0 20px;color:#fff;color:rgba(255,255,255,.7);
+        transition:all .3s;-webkit-transition:all .3s}
     </style>
   </head>
   <body class="layui-layout-body">
@@ -17,9 +19,9 @@
       <div class="layui-logo">订单管理系统</div>
       <!-- 头部区域（可配合layui已有的水平导航） -->
       <ul class="layui-nav layui-layout-left">
-        <li class="layui-nav-item layui-nav-itemed"><a href="">订单列表</a></li>
-        <li class="layui-nav-item"><a href="customer.html">客户管理</a></li>
-        <li class="layui-nav-item"><a href="user.html">用户管理</a></li>
+        <li class="layui-nav-item"><a href="main.html">订单列表</a></li>
+        <li class="layui-nav-item layui-nav-itemed "><a href="">客户管理</a></li>
+        <li class="layui-nav-item "><a href="user.html">用户管理</a></li>
         <li class="layui-nav-item"><a href="">数据上传</a></li>
         <li class="layui-nav-item">
           <a href="javascript:;">其它系统</a>
@@ -46,30 +48,47 @@
     
     <div class="layui-side layui-bg-black">
       <div class="layui-side-scroll">
+        <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+        <!-- <ul class="layui-nav layui-nav-tree"  lay-filter="test">
+          <li class="layui-nav-item layui-nav-itemed">
+            <a class="" href="javascript:;">所有商品</a>
+            <dl class="layui-nav-child">
+              <dd><a href="javascript:;">列表一</a></dd>
+              <dd><a href="javascript:;">列表二</a></dd>
+              <dd><a href="javascript:;">列表三</a></dd>
+              <dd><a href="">超链接</a></dd>
+            </dl>
+          </li>
+          <li class="layui-nav-item">
+            <a href="javascript:;">解决方案</a>
+            <dl class="layui-nav-child">
+              <dd><a href="javascript:;">列表一</a></dd>
+              <dd><a href="javascript:;">列表二</a></dd>
+              <dd><a href="">超链接</a></dd>
+            </dl>
+          </li>
+          <li class="layui-nav-item"><a href="">云市场</a></li>
+          <li class="layui-nav-item"><a href="">发布商品</a></li>
+        </ul> -->
       </div>
     </div>
     
     <div class="layui-body">
       <!-- 内容主体区域 -->
-      <table class="layui-hide" id="orderList" lay-filter="orderFunction"></table>
+    <table class="layui-hide" id="customerList" lay-filter="customerFunction"></table>
     </div>
     
-    
-  <div class="loading-box">
-     <div class="loading">
-         <div class="loading-img">
-             <img src="images/loading.gif">
-         </div>
-     </div>
-  </div>
+   <!--  <div class="layui-footer">
+      底部固定区域
+        底部固定区域
+    </div> -->
   </div>
 
-  
-  <script src="js/common.js"></script>  
+    
   <script src="../layui/layui.js"></script>
+  <script src="js/common.js"></script>
   <script>
-    //JavaScript代码区域
-    //默认寻找base也就是js/index.js模块导入
+  //JavaScript代码区域
   layui.config({base: '../res/js/'}).extend({
     cookie: 'module/cookie' 
   });
@@ -83,18 +102,19 @@
       // layer.msg('cookie='+$.cookie('the_cookie'));
       //监听提交
       form.on('submit(logout)', function(data){
-
-          location.href="login.html";
+        location.href="login.html";
         return false;
       });
-
+      var test = 'test';
+      function getTest(){
+        return 'testFun';
+      }
       //执行一个 table 实例
       table.render({
-        elem: '#orderList'
+        elem: '#customerList'
         ,height: 420
-        ,url: urlOrderList //数据接口
+        ,url: urlCustomerList //数据接口
         ,method:'get'
-        ,where:{beginDate:'2019-01-01',endDate:'2019-06-01',isClose:'1'}
         ,headers:{token:$.cookie('the_cookie')}
         ,title: '订单表'
         ,page: true //开启分页
@@ -118,49 +138,50 @@
           {type: 'checkbox', fixed: 'left'}
           ,{field: 'companyId', title: '客户Id', width:80, sort: true, fixed: 'left', totalRowText: '合计：'}
           ,{field: 'companyName', title: '客户名', width:80}
-          ,{field: 'licenceCount', title: '总数', width: 90, sort: true, totalRow: true}
-          ,{field: 'activateCount', title: '可用数', width:80, sort: true}
-          ,{field: 'orderDate', title: '订单日期', width: 120, sort: true, totalRow: true}
-          ,{field: 'key1', title: 'Key1', width: 300}
+          ,{field: 'status', title: '状态', width: 90, sort: true, totalRow: true}
         ]]
       });
       
       //监听头工具栏事件
-      table.on('toolbar(orderFunction)', function(obj){
+      table.on('toolbar(customerFunction)', function(obj){
         var checkStatus = table.checkStatus(obj.config.id)
         ,data = checkStatus.data; //获取选中的数据
+        data.id = "123";
+        data.name = "customer123";
         switch(obj.event){
           case 'add':
             layer.msg('添加');
             layer.open({
               type:2,
-              title:'订单添加',
-              content:['orderAdd.html','no'],
+              title:'客户添加',
+              content:['customerAdd.html'],
               area:['400px','500px'],
               end: function(){
                 window.parent.layer.msg('新增后关闭成功');
-                table.reload('orderList',{page:{curr:1}});
-              }
+                table.reload('customerList',{page:{curr:1}});
+              },
+              data:data
             });
           break;
           case 'update':
             if(data.length === 0){
-              // layer.msg('请选择一行');
               layer.msg('cookie='+$.cookie('the_cookie'));
               layer.open({
                 type:2,
-                title:'订单修改',
-                content:['orderEdit.html?id=123&customerName=customer123&chipSn=SN123&licenceCount=100&dateStr=2019-06-06&key1=keykeykey1'],
+                title:'客户修改',
+                content:['customerEdit.html?id=123&name=customer123'],
                 area:['400px','500px'],
                 end: function(){
                   window.parent.layer.msg('修改后关闭成功');
                   table.reload('customerList',{page:{curr:1}});
                 }
               });
+              // layer.msg('请选择一行');
             } else if(data.length > 1){
               layer.msg('只能同时编辑一个');
             } else {
               layer.alert('编辑 [id]：'+ checkStatus.data[0].id);
+
             }
           break;
           case 'delete':
