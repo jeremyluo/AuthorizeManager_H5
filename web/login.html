@@ -105,20 +105,21 @@
         if (data.field.userName === 'miou' && data.field.password === '123456') {
           $.ajax({
             url: urlLogin,
-            method: 'get',
+            method: 'post',
             data: data.field,
             dataType: 'JSON',
-            timeout: 3000,
+            timeout: 10000,
             beforeSend: function () {
               $(".loading-box").show();
             },
             success: function (res) {
+              $(".loading-box").hide();
               if (res.code = '0') {
                 layer.msg('登录成功');
-                location.href = "main.html";
                 $.cookie('the_cookie', res.data.token);
-                layer.msg('cookie=' + $.cookie('the_cookie'));
-                parent.closeIframe(res.msg);
+                $.cookie('userName', data.field.userName);
+
+                location.href = "main.html";
               }
               else {
                 layer.msg('登录失败,msg=' + res.errorMessage);
@@ -129,18 +130,18 @@
               $(".loading-box").hide();
               if (textStatus == 'timeout') {
                 layer.msg('登录超时');
-                location.href = "main.html";
+                // location.href = "main.html";
               }
             },
             error: function (data) {
               $(".loading-box").hide();
               layer.msg('登录失败');
-              location.href = "main.html";
+              // location.href = "main.html";
             }
           });
         } else {
           // layer.msg('用户名密码错误');
-          location.href = "main.html";
+          // location.href = "main.html";
         }
         layer.msg('用户名密码');
         return false;

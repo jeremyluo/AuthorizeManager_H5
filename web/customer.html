@@ -150,7 +150,7 @@
         , height: 420
         , url: urlCustomerList //数据接口
         , method: 'get'
-        , headers: { token: $.cookie('the_cookie') }
+        , headers: { token: $.cookie('the_cookie'), userName: $.cookie('userName') }
         , title: '订单表'
         , page: true //开启分页
         , toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
@@ -172,7 +172,7 @@
         , cols: [[ //表头
           { type: 'checkbox', fixed: 'left' }
           , { field: 'companyId', title: '客户Id', width: 80, sort: true, fixed: 'left', totalRowText: '合计：' }
-          , { field: 'companyName', title: '客户名', width: 80 }
+          , { field: 'companyName', title: '客户名', width: 160 }
           , { field: 'status', title: '状态', width: 90, sort: true, totalRow: true }
         ]]
       });
@@ -181,8 +181,6 @@
       table.on('toolbar(customerFunction)', function (obj) {
         var checkStatus = table.checkStatus(obj.config.id)
           , data = checkStatus.data; //获取选中的数据
-        data.id = "123";
-        data.name = "customer123";
         switch (obj.event) {
           case 'add':
             layer.msg('添加');
@@ -215,8 +213,18 @@
             } else if (data.length > 1) {
               layer.msg('只能同时编辑一个');
             } else {
-              layer.alert('编辑 [id]：' + checkStatus.data[0].id);
+              layer.open({
+                type: 2,
+                title: '客户修改',
+                content: ['customerEdit.html?id=' + checkStatus.data[0].companyId + '&name=' + encodeURI(checkStatus.data[0].companyName)],
+                area: ['400px', '500px'],
+                end: function () {
+                  window.parent.layer.msg('修改后关闭成功');
+                  table.reload('customerList', { page: { curr: 1 } });
+                }
+              });
 
+              layer.alert('编辑 [companyId]：' + checkStatus.data[0].companyName);
             }
             break;
           case 'delete':

@@ -33,22 +33,28 @@
 
   <form class="layui-form" lay-filter="orderForm">
     <div class="layui-form">
-      <div class="layui-form-item display-no">
-        <label class="layui-form-label">ID</label>
+      <div class="layui-form-item">
+        <label class="layui-form-label">订单ID</label>
         <div class="layui-input-inline">
-          <input type="text" name="id" lay-verify="required" id="id" placeholder="ID" autocomplete="off" class="layui-input">
+          <input type="text" name="orderId" lay-verify="required" id="orderId" placeholder="订单ID" autocomplete="off" class="layui-input">
         </div>
       </div>
       <div class="layui-form-item">
         <label class="layui-form-label">客户名称</label>
         <div class="layui-input-inline">
-          <input type="text" name="customerName" lay-verify="required" id="customerName" placeholder="请输入客户名称" autocomplete="off" class="layui-input">
+          <input type="text" name="companyName" lay-verify="required" id="companyName" placeholder="请输入客户名称" autocomplete="off" class="layui-input">
         </div>
       </div>
       <div class="layui-form-item">
-        <label class="layui-form-label">芯片型号</label>
+        <label class="layui-form-label">订单日期</label>
         <div class="layui-input-inline">
-          <input type="text" name="chipSn" lay-verify="required" id="chipSn" placeholder="请输入芯片型号" autocomplete="off" class="layui-input">
+          <input type="text" name="orderDate" lay-verify="required" id="orderDate" placeholder="请输入订单日期" autocomplete="off" class="layui-input">
+        </div>
+      </div>
+      <div class="layui-form-item">
+        <label class="layui-form-label">KEY</label>
+        <div class="layui-input-inline">
+          <input type="text" name="key1" id="key1" placeholder="请输入KEY" autocomplete="off" class="layui-input">
         </div>
       </div>
       <div class="layui-form-item">
@@ -59,21 +65,8 @@
         </div>
       </div>
       <div class="layui-form-item">
-        <label class="layui-form-label">订单日期</label>
-        <div class="layui-input-inline">
-          <input type="text" name="dateStr" lay-verify="required" id="dateStr" placeholder="请输入订单日期" autocomplete="off" class="layui-input">
-        </div>
-      </div>
-      <div class="layui-form-item">
-        <label class="layui-form-label">KEY</label>
-        <div class="layui-input-inline">
-          <input type="text" name="key1" id="key1" placeholder="请输入KEY" autocomplete="off" class="layui-input">
-        </div>
-      </div>
-      <div class="layui-form-item">
         <div class="layui-input-block">
           <button class="layui-btn layui-btn-radius layui-btn-normal" lay-submit lay-filter="orderEdit">修改</button>
-          <button type="reset" class="layui-btn  layui-btn-radius layui-btn-primary">重置</button>
         </div>
       </div>
     </div>
@@ -93,15 +86,16 @@
   <script>
     //JavaScript代码区域
     getParam();
-    var id, customerName, chipSn, licenceCount, dateStr, key1;
+    var url, orderId, companyName, licenceCount, orderDate,checkStatus, key1;
     function getParam() {
-      var url = location.search.substring(1);//location.search得到的是？后面的数据: ?modelId='+data.id,substring() 方法用于提取字符串中介于两个指定下标之间的字符;得到的是去掉?的部分
+      url = location.search.substring(1);//location.search得到的是？后面的数据: ?modelId='+data.id,substring() 方法用于提取字符串中介于两个指定下标之间的字符;得到的是去掉?的部分
+      
       if (url != null && url != undefined && url != "") {  //表示，如果有参数；且不等于空，则进行分割得到data.id;
-        id = url.split('&')[0].split('=')[1];　　　 //data.id;　
-        customerName = url.split('&')[1].split('=')[1];
-        chipSn = url.split('&')[2].split('=')[1];
-        licenceCount = url.split('&')[3].split('=')[1];
-        dateStr = url.split('&')[4].split('=')[1];
+        orderId = url.split('&')[0].split('=')[1];　　　 //data.id;　
+        companyName = decodeURI(url.split('&')[1].split('=')[1]);
+        licenceCount = url.split('&')[2].split('=')[1];
+        orderDate = url.split('&')[3].split('=')[1];
+        checkStatus = (url.split('&')[4] || '').split('=')[1];
         key1 = (url.split('&')[5] || '').split('=')[1];
       }
     }
@@ -117,30 +111,33 @@
         , cookie = layui.cookie;
 
       form.val("orderForm", {
-        "id": id,
-        "customerName": customerName,
-        "chipSn": chipSn,
+        "orderId": orderId,
+        "companyName": companyName,
         "licenceCount": licenceCount,
-        "dateStr": dateStr,
+        "orderDate": orderDate,
         "key1": key1
       })
+
 
       //监听提交
       form.on('submit(orderEdit)', function (data) {
         $.ajax({
-          url: urlOrderAdd,
+          url: urlOrderUpdate,
           method: 'post',
-          data: data.field,
+          // data: data.field,
+          data:{'checkStatus':data.field.checkStatus,'orderId':data.field.orderId,'licenceCount':data.field.licenceCount},
           dataType: 'JSON',
-          timeout: 3000,
-          headers: { token: $.cookie('the_cookie') },
+          timeout: 10000,
+          headers: { token: $.cookie('the_cookie'), userName: $.cookie('userName') },
           beforeSend: function () {
             $(".loading-box").show();
           },
           success: function (res) {
+            $(".loading-box").hide();
             if (res.code = '0') {
               layer.msg('修改订单成功');
-              parent.closeIframe(res.msg);
+              var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+              parent.layer.close(index); //再执行关闭
             }
             else {
               layer.msg('修改订单失败,msg=' + res.errorMessage);
@@ -152,12 +149,12 @@
             $(".loading-box").hide();
             if (textStatus == 'timeout') {
               layer.msg('接口超时');
-              // parent.closeIframe('');
               var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
               parent.layer.close(index); //再执行关闭
             }
           },
           error: function (data) {
+            $(".loading-box").hide();
             layer.msg('操作失败');
           }
         });

@@ -35,7 +35,7 @@
       <div class="layui-form-item">
         <label class="layui-form-label">客户名称</label>
         <div class="layui-input-inline">
-          <input type="text" name="customerName" lay-verify="required" id="customerName" placeholder="请输入客户名称" autocomplete="off" class="layui-input">
+          <input type="text" name="companyName" lay-verify="required" id="companyName" placeholder="请输入客户名称" autocomplete="off" class="layui-input">
         </div>
       </div>
       <div class="layui-form-item">
@@ -66,16 +66,17 @@
           data: data.field,
           dataType: 'JSON',
           timeout: 3000,
+          headers: { token: $.cookie('the_cookie'), userName: $.cookie('userName') },
           beforeSend: function () {
             $(".loading-box").show();
           },
-          complete: function () {
-            $(".loading-box").hide();
-          },
           success: function (res) {
+            $(".loading-box").hide();
             if (res.code = '0') {
               layer.msg('添加客户成功');
-              parent.closeIframe(res.msg);
+
+              var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+              parent.layer.close(index); //再执行关闭
             }
             else {
               layer.msg('添加客户失败,msg=' + res.errorMessage);
@@ -83,6 +84,7 @@
             }
           },
           complete: function (XMLHttpRequest, textStatus) {
+            $(".loading-box").hide();
             if (textStatus == 'timeout') {
               layer.msg('接口超时');
               // parent.closeIframe('');
