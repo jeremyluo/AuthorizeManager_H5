@@ -148,6 +148,8 @@
       $ = layui.jquery;
       layer.msg('cookie=' + $.cookie('the_cookie'));
 
+      $("#user").append($.cookie('userName'));
+      
       //监听提交
       form.on('submit(logout)', function (data) {
 

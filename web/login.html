@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <title>登录页面</title>
   <link rel="stylesheet" href="../layui/css/layui.css" media="all">
   <link rel="stylesheet" href="css/common.css" media="all">
@@ -20,7 +21,7 @@
 
     .formDiv {
       width: 400px;
-      background:white;
+      background: white;
       padding-top: 20px;
       padding-bottom: 20px;
       padding-left: 20px;
@@ -46,7 +47,8 @@
       <div class="layui-form-item">
         <label class="layui-form-label layui-icon layui-icon-username"> 用户名</label>
         <div class="layui-input-inline">
-          <input type="text" name="userName" required lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+          <input type="text" name="userName" required lay-verify="required" placeholder="请输入用户名" autocomplete="off"
+            class="layui-input">
         </div>
         <div class="layui-form-mid layui-word-aux">miou</div>
       </div>
@@ -54,7 +56,8 @@
       <div class="layui-form-item">
         <label class="layui-form-label layui-icon layui-icon-password"> 密码</label>
         <div class="layui-input-inline">
-          <input type="password" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">
+          <input type="password" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off"
+            class="layui-input">
         </div>
         <div class="layui-form-mid layui-word-aux">123456</div>
       </div>
@@ -98,52 +101,41 @@
       })
       //监听提交
       form.on('submit(loginButton)', function (data) {
-        // layer.msg(JSON.stringify(data.field));
-        // layer.msg(data.field.userName)
-        layer.msg(urlLogin)
+        $.ajax({
+          url: urlLogin,
+          method: 'post',
+          data: data.field,
+          dataType: 'JSON',
+          timeout: 10000,
+          beforeSend: function () {
+            $(".loading-box").show();
+          },
+          success: function (res) {
+            $(".loading-box").hide();
+            if (res.code = '0') {
+              layer.msg('登录成功');
+              $.cookie('the_cookie', res.data.token);
+              $.cookie('userName', data.field.userName);
 
-        if (data.field.userName === 'miou' && data.field.password === '123456') {
-          $.ajax({
-            url: urlLogin,
-            method: 'post',
-            data: data.field,
-            dataType: 'JSON',
-            timeout: 10000,
-            beforeSend: function () {
-              $(".loading-box").show();
-            },
-            success: function (res) {
-              $(".loading-box").hide();
-              if (res.code = '0') {
-                layer.msg('登录成功');
-                $.cookie('the_cookie', res.data.token);
-                $.cookie('userName', data.field.userName);
-
-                location.href = "main.html";
-              }
-              else {
-                layer.msg('登录失败,msg=' + res.errorMessage);
-                alert(res.msg);
-              }
-            },
-            complete: function (XMLHttpRequest, textStatus) {
-              $(".loading-box").hide();
-              if (textStatus == 'timeout') {
-                layer.msg('登录超时');
-                // location.href = "main.html";
-              }
-            },
-            error: function (data) {
-              $(".loading-box").hide();
-              layer.msg('登录失败');
-              // location.href = "main.html";
+              location.href = "main.html";
             }
-          });
-        } else {
-          // layer.msg('用户名密码错误');
-          // location.href = "main.html";
-        }
-        layer.msg('用户名密码');
+            else {
+              layer.msg('登录失败,msg=' + res.errorMessage);
+              alert(res.msg);
+            }
+          },
+          complete: function (XMLHttpRequest, textStatus) {
+            $(".loading-box").hide();
+            if (textStatus == 'timeout') {
+              layer.msg('登录超时');
+              $.cookie('userName', data.field.userName);
+            }
+          },
+          error: function (data) {
+            $(".loading-box").hide();
+            layer.msg('登录失败');
+          }
+        });
         return false;
       });
     });

@@ -1,7 +1,11 @@
 // common.js
+
+//是否mock
+var isAjaxMocked = true;
+
 //服务器 
 var host = "http://192.168.0.102:8080";
-host = "http://10.254.189.190:8080";
+host = "http://193.112.56.76:8080";
 //后端接口文档 https://github.com/deif2005/activate
 
 //接口地址
@@ -27,3 +31,4 @@ var urlOrderAdd = host + '/order/v1/addOrderConfig';
 var urlOrderList = host + '/data/v1/listOrderConfig';
 //更新订单信息
 var urlOrderUpdate = host + '/order/v1/updateOrderConfig';
+

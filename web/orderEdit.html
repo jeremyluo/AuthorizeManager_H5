@@ -36,25 +36,33 @@
       <div class="layui-form-item">
         <label class="layui-form-label">订单ID</label>
         <div class="layui-input-inline">
-          <input type="text" name="orderId" lay-verify="required" id="orderId" placeholder="订单ID" autocomplete="off" class="layui-input">
+          <input type="text" name="orderId" lay-verify="required" id="orderId" disabled="disabled" autocomplete="off" class="layui-input">
         </div>
       </div>
+      
+      <div class="layui-form-item display-no">
+          <label class="layui-form-label">客户ID</label>
+          <div class="layui-input-inline">
+            <input type="text" name="companyId" lay-verify="required" id="companyId" placeholder="ID" autocomplete="off" class="layui-input">
+          </div>
+        </div>
       <div class="layui-form-item">
-        <label class="layui-form-label">客户名称</label>
-        <div class="layui-input-inline">
-          <input type="text" name="companyName" lay-verify="required" id="companyName" placeholder="请输入客户名称" autocomplete="off" class="layui-input">
+        <label class="layui-form-label">客户名称:</label>
+        <div class="layui-input-block">
+            <input type="text" name="companyName" id="companyName"  disabled="disabled" autocomplete="off" class="layui-input">
+          
         </div>
       </div>
       <div class="layui-form-item">
         <label class="layui-form-label">订单日期</label>
         <div class="layui-input-inline">
-          <input type="text" name="orderDate" lay-verify="required" id="orderDate" placeholder="请输入订单日期" autocomplete="off" class="layui-input">
+          <input type="text" name="orderDate" lay-verify="required" id="orderDate" disabled="disabled" autocomplete="off" class="layui-input">
         </div>
       </div>
       <div class="layui-form-item">
         <label class="layui-form-label">KEY</label>
         <div class="layui-input-inline">
-          <input type="text" name="key1" id="key1" placeholder="请输入KEY" autocomplete="off" class="layui-input">
+          <input type="text" name="key1" id="key1" placeholder="请输入KEY" disabled="disabled" autocomplete="off" class="layui-input">
         </div>
       </div>
       <div class="layui-form-item">
@@ -86,17 +94,18 @@
   <script>
     //JavaScript代码区域
     getParam();
-    var url, orderId, companyName, licenceCount, orderDate,checkStatus, key1;
+    var url, orderId,companyId, companyName, licenceCount, orderDate,checkStatus, key1;
     function getParam() {
       url = location.search.substring(1);//location.search得到的是？后面的数据: ?modelId='+data.id,substring() 方法用于提取字符串中介于两个指定下标之间的字符;得到的是去掉?的部分
       
       if (url != null && url != undefined && url != "") {  //表示，如果有参数；且不等于空，则进行分割得到data.id;
         orderId = url.split('&')[0].split('=')[1];　　　 //data.id;　
-        companyName = decodeURI(url.split('&')[1].split('=')[1]);
-        licenceCount = url.split('&')[2].split('=')[1];
-        orderDate = url.split('&')[3].split('=')[1];
-        checkStatus = (url.split('&')[4] || '').split('=')[1];
-        key1 = (url.split('&')[5] || '').split('=')[1];
+        companyId = decodeURI(url.split('&')[1].split('=')[1]);
+        companyName = decodeURI(url.split('&')[2].split('=')[1]);
+        licenceCount = url.split('&')[3].split('=')[1];
+        orderDate = url.split('&')[4].split('=')[1];
+        checkStatus = (url.split('&')[5] || '').split('=')[1];
+        key1 = (url.split('&')[6] || '').split('=')[1];
       }
     }
 
@@ -112,12 +121,12 @@
 
       form.val("orderForm", {
         "orderId": orderId,
+        "companyId": companyId,
         "companyName": companyName,
         "licenceCount": licenceCount,
         "orderDate": orderDate,
         "key1": key1
       })
-
 
       //监听提交
       form.on('submit(orderEdit)', function (data) {
@@ -125,7 +134,9 @@
           url: urlOrderUpdate,
           method: 'post',
           // data: data.field,
-          data:{'checkStatus':data.field.checkStatus,'orderId':data.field.orderId,'licenceCount':data.field.licenceCount},
+          data:{'checkStatus':data.field.checkStatus,'orderId':data.field.orderId
+          ,'companyId':companyId
+          ,'licenceCount':data.field.licenceCount},
           dataType: 'JSON',
           timeout: 10000,
           headers: { token: $.cookie('the_cookie'), userName: $.cookie('userName') },

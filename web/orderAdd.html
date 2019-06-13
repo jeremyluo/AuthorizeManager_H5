@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <title>订单新增</title>
   <link rel="stylesheet" href="../layui/css/layui.css" media="all">
   <link rel="stylesheet" href="css/common.css" media="all">
@@ -33,37 +34,40 @@
 
   <form class="layui-form" lay-filter="orderAdd">
     <div class="layui-form">
-      <div class="layui-form-item">
+
+      <div class="layui-form-item display-no">
         <label class="layui-form-label">客户ID</label>
         <div class="layui-input-inline">
-          <input type="text" name="companyId" lay-verify="required" id="companyId" placeholder="companyId" autocomplete="off" class="layui-input">
+          <input type="text" name="companyId" id="companyId" placeholder="ID" autocomplete="off"
+            class="layui-input">
         </div>
       </div>
       <div class="layui-form-item">
-        <label class="layui-form-label">
-          客户名称:</label>
-        <div class="layui-input-block">
-          <select name="customerNameSelect" lay-filter="customerNameSelect" id="customerNameSelect" lay-search="" lay-verify="select">
-          </select>
-        </div>
+        <label class="layui-form-label">客户名称:</label>
+        <div class="layui-input-inline">
+            <input type="text" name="companyName" lay-verify="required" id="companyName" autocomplete="off"  disabled="disabled"
+              class="layui-input">
+          </div>
       </div>
       <div class="layui-form-item">
         <label class="layui-form-label">芯片型号</label>
         <div class="layui-input-inline">
-          <input type="text" name="chipSn" lay-verify="required" id="chipSn" placeholder="请输入芯片型号" autocomplete="off" class="layui-input">
+          <input type="text" name="chipSn" lay-verify="required" id="chipSn" placeholder="请输入芯片型号" autocomplete="off"
+            class="layui-input">
         </div>
       </div>
       <div class="layui-form-item">
-          <label class="layui-form-label">许可授权数</label>
-          <div class="layui-input-inline">
-            <input type="text" name="licenceCount" lay-verify="required" id="licenceCount" placeholder="请输入许可授权数" autocomplete="off"
-              class="layui-input">
-          </div>
+        <label class="layui-form-label">许可授权数</label>
+        <div class="layui-input-inline">
+          <input type="text" name="licenceCount" lay-verify="required" id="licenceCount" placeholder="请输入许可授权数"
+            autocomplete="off" class="layui-input">
         </div>
+      </div>
       <div class="layui-form-item">
         <label class="layui-form-label">订单日期</label>
         <div class="layui-input-inline">
-          <input type="text" name="dateStr" lay-verify="required" id="dateStr" placeholder="请输入订单日期" autocomplete="off" class="layui-input">
+          <input type="text" name="dateStr" lay-verify="required" id="dateStr" placeholder="请输入订单日期" autocomplete="off"
+            class="layui-input">
         </div>
       </div>
       <div class="layui-form-item">
@@ -94,6 +98,17 @@
   <script src="../layui/layui.js"></script>
   <script>
     //JavaScript代码区域
+    getParam();
+    var url,companyId, companyName;
+    function getParam() {
+      url = location.search.substring(1);//location.search得到的是？后面的数据: ?modelId='+data.id,substring() 方法用于提取字符串中介于两个指定下标之间的字符;得到的是去掉?的部分
+      
+      if (url != null && url != undefined && url != "") {  //表示，如果有参数；且不等于空，则进行分割得到data.id;
+        companyId = decodeURI(url.split('&')[0].split('=')[1]);
+        companyName = decodeURI(url.split('&')[1].split('=')[1]);
+      }
+    }
+
     layui.config({ base: '../res/js/' }).extend({
       cookie: 'module/cookie'
     });
@@ -108,61 +123,24 @@
       //执行一个laydate实例
       laydate.render({
         elem: '#dateStr' //指定元素
-        ,format: 'yyyyMMdd'
+        , format: 'yyyyMMdd'
       });
-      //获取客户列表
-      $.ajax({
-        url: urlCustomerList,
-        method: 'get',
-        dataType: 'JSON',
-        timeout: 3000,
-        headers: { token: $.cookie('the_cookie'), userName: $.cookie('userName') },
-        beforeSend: function () {
-          $(".loading-box").show();
-        },
-        success: function (res) {
-          if (res.code = '0') {
-            var data = res.data;
-            if (data != undefined && data != null && data != "" 
-                  && data.list != undefined && data.list != null && data.list != "") {
-              var html = "";
-              for (var i = 0; i < data.list.length; i++) {
-                if (i == 0) {
-                  html += "<option value=''>直接选择或搜索选择</option>";
-                } else {
-                  html += "<option value=" + data.list[i]["companyId"] + ">" + data.list[i]["companyName"] + "</option>";
-                }
-              }
-              $("#customerNameSelect").append(html);
-            }
-          }
-          else {
-            layer.msg('获取客户数据失败,msg=' + res.errorMessage);
-          }
-        },
-        //调用执行后调用的函数
-        complete: function (XMLHttpRequest, textStatus) {
-          $(".loading-box").hide();
-          if (textStatus == 'timeout') {
-            layer.msg('接口超时');
-            // parent.closeIframe('');
-            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
-            parent.layer.close(index); //再执行关闭
-          }
-        },
-        error: function (data) {
-          layer.msg('操作失败');
-        }
-      });
-
+      form.val("orderAdd", {
+        "companyId": companyId,
+        "companyName": companyName
+      })
       //监听提交
       form.on('submit(orderAdd)', function (data) {
+
         $.ajax({
           url: urlOrderAdd,
           method: 'post',
-          data: data.field,
+          data: {'companyId':companyId
+          ,'chipSn':data.field.chipSn
+          ,'licenceCount':data.field.licenceCount
+          ,'dateStr':data.field.dateStr
+          ,'key1':data.field.key1,},
           dataType: 'JSON',
-          timeout: 3000,
           headers: { token: $.cookie('the_cookie'), userName: $.cookie('userName') },
           beforeSend: function () {
             $(".loading-box").show();
@@ -184,8 +162,6 @@
             $(".loading-box").hide();
             if (textStatus == 'timeout') {
               layer.msg('接口超时');
-              var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
-              parent.layer.close(index); //再执行关闭
             }
           },
           error: function (data) {
