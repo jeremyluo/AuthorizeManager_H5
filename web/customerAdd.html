@@ -77,8 +77,16 @@
 
               var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
               parent.layer.close(index); //再执行关闭
-            }
-            else {
+            } else if (res.code === '1003') {
+              layer.confirm(res.errorMessage + ',是否重新登录？', {
+                btn: ['重新登录', '算了'] //按钮
+              }, function () {
+                $.cookie('the_cookie', '');
+                $.cookie('userName', '');
+                location.href = "login.html";
+              }, function () {
+              });
+            } else {
               layer.msg('添加客户失败,msg=' + res.errorMessage);
               alert(res.msg);
             }

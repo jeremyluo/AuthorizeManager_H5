@@ -38,16 +38,15 @@
       <div class="layui-form-item display-no">
         <label class="layui-form-label">客户ID</label>
         <div class="layui-input-inline">
-          <input type="text" name="companyId" id="companyId" placeholder="ID" autocomplete="off"
-            class="layui-input">
+          <input type="text" name="companyId" id="companyId" placeholder="ID" autocomplete="off" class="layui-input">
         </div>
       </div>
       <div class="layui-form-item">
         <label class="layui-form-label">客户名称:</label>
         <div class="layui-input-inline">
-            <input type="text" name="companyName" lay-verify="required" id="companyName" autocomplete="off"  disabled="disabled"
-              class="layui-input">
-          </div>
+          <input type="text" name="companyName" lay-verify="required" id="companyName" autocomplete="off"
+            disabled="disabled" class="layui-input">
+        </div>
       </div>
       <div class="layui-form-item">
         <label class="layui-form-label">芯片型号</label>
@@ -99,10 +98,10 @@
   <script>
     //JavaScript代码区域
     getParam();
-    var url,companyId, companyName;
+    var url, companyId, companyName;
     function getParam() {
       url = location.search.substring(1);//location.search得到的是？后面的数据: ?modelId='+data.id,substring() 方法用于提取字符串中介于两个指定下标之间的字符;得到的是去掉?的部分
-      
+
       if (url != null && url != undefined && url != "") {  //表示，如果有参数；且不等于空，则进行分割得到data.id;
         companyId = decodeURI(url.split('&')[0].split('=')[1]);
         companyName = decodeURI(url.split('&')[1].split('=')[1]);
@@ -135,24 +134,34 @@
         $.ajax({
           url: urlOrderAdd,
           method: 'post',
-          data: {'companyId':companyId
-          ,'chipSn':data.field.chipSn
-          ,'licenceCount':data.field.licenceCount
-          ,'dateStr':data.field.dateStr
-          ,'key1':data.field.key1,},
+          data: {
+            'companyId': companyId
+            , 'chipSn': data.field.chipSn
+            , 'licenceCount': data.field.licenceCount
+            , 'dateStr': data.field.dateStr
+            , 'key1': data.field.key1,
+          },
           dataType: 'JSON',
           headers: { token: $.cookie('the_cookie'), userName: $.cookie('userName') },
           beforeSend: function () {
             $(".loading-box").show();
           },
           success: function (res) {
-            if (res.code = '0') {
+            if (res.code === '0') {
               layer.msg('添加订单成功');
 
               var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
               parent.layer.close(index); //再执行关闭
-            }
-            else {
+            } else if (res.code === '1003') {
+              layer.confirm(res.errorMessage + ',是否重新登录？', {
+                btn: ['重新登录', '算了'] //按钮
+              }, function () {
+                $.cookie('the_cookie', '');
+                $.cookie('userName', '');
+                location.href = "login.html";
+              }, function () {
+              });
+            } else {
               layer.msg('添加订单失败,msg=' + res.errorMessage);
               alert(res.msg);
             }
