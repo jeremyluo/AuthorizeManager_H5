@@ -41,71 +41,31 @@
         <li class="layui-nav-item layui-nav-itemed ">
           <a href="">客户管理</a>
         </li>
-        <!-- <li class="layui-nav-item ">
-          <a href="">用户管理</a>
-        </li>
         <li class="layui-nav-item">
-          <a href="">数据上传</a>
-        </li>
-        <li class="layui-nav-item">
-          <a href="javascript:;">其它系统</a>
+          <a href="javascript:;">报表</a>
           <dl class="layui-nav-child">
             <dd>
-              <a href="">邮件管理</a>
+              <a href="reportOrder.html">订单统计报表</a>
             </dd>
             <dd>
-              <a href="">消息管理</a>
-            </dd>
-            <dd>
-              <a href="">授权管理</a>
+              <a href="reportOrderDetail.html">订单详情报表</a>
             </dd>
           </dl>
-        </li> -->
+        </li>
       </ul>
       <ul class="layui-nav layui-layout-right">
         <li class="layui-nav-item">
-          <a href="javascript:;">
-            <img src="http://t.cn/RCzsdCq" class="layui-nav-img">用户A
+          <a href="javascript:;" id="user">用户
           </a>
-          <dl class="layui-nav-child">
-            <dd>
-              <a href="">基本资料</a>
-            </dd>
-            <dd>
-              <a href="">安全设置</a>
-            </dd>
-          </dl>
         </li>
         <li class="layui-nav-item">
-          <a href="login.html" lay-filter="logout">退了</a>
+          <a lay-filter="logout" id='logout'>退了</a>
         </li>
       </ul>
     </div>
 
     <div class="layui-side layui-bg-black">
       <div class="layui-side-scroll">
-        <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
-        <!-- <ul class="layui-nav layui-nav-tree"  lay-filter="test">
-          <li class="layui-nav-item layui-nav-itemed">
-            <a class="" href="javascript:;">所有商品</a>
-            <dl class="layui-nav-child">
-              <dd><a href="javascript:;">列表一</a></dd>
-              <dd><a href="javascript:;">列表二</a></dd>
-              <dd><a href="javascript:;">列表三</a></dd>
-              <dd><a href="">超链接</a></dd>
-            </dl>
-          </li>
-          <li class="layui-nav-item">
-            <a href="javascript:;">解决方案</a>
-            <dl class="layui-nav-child">
-              <dd><a href="javascript:;">列表一</a></dd>
-              <dd><a href="javascript:;">列表二</a></dd>
-              <dd><a href="">超链接</a></dd>
-            </dl>
-          </li>
-          <li class="layui-nav-item"><a href="">云市场</a></li>
-          <li class="layui-nav-item"><a href="">发布商品</a></li>
-        </ul> -->
       </div>
     </div>
 
@@ -135,20 +95,33 @@
         , layer = layui.layer
         , $ = layui.jquery
         , cookie = layui.cookie;
-      // layer.msg('cookie='+$.cookie('the_cookie'));
       //监听提交
-      form.on('submit(logout)', function (data) {
-        location.href = "login.html";
-        return false;
+
+      $("#logout").on('click', function () {
+        layer.confirm('是否确认退出登录？', {
+          btn: ['确认退出', '算了，再看看'] //按钮
+        }, function () {
+
+          $.ajax({
+            url: urlLogout,
+            method: 'post',
+            dataType: 'JSON',
+            headers: { token: $.cookie('the_cookie'), userName: $.cookie('userName') },
+            timeout: 10000
+          });
+
+          $.cookie('the_cookie', '');
+          $.cookie('userName', '');
+          location.href = "login.html";
+
+        }, function () {
+        });
       });
-      var test = 'test';
-      function getTest() {
-        return 'testFun';
-      }
+
       //执行一个 table 实例
       table.render({
         elem: '#customerList'
-        , height: 420
+        , height: 'full-180', cellMinWidth: 80
         , url: urlCustomerList //数据接口
         , method: 'get'
         , headers: { token: $.cookie('the_cookie'), userName: $.cookie('userName') }

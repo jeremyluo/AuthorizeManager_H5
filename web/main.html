@@ -187,6 +187,28 @@
 
       $("#user").append($.cookie('userName'));
 
+      //监听退出
+      $("#logout").on('click', function () {
+        layer.confirm('是否确认退出登录？', {
+          btn: ['确认退出', '算了，再看看'] //按钮
+        }, function () {
+
+          $.ajax({
+            url: urlLogout,
+            method: 'post',
+            dataType: 'JSON',
+            headers: { token: $.cookie('the_cookie'), userName: $.cookie('userName') },
+            timeout: 10000
+          });
+
+          $.cookie('the_cookie', '');
+          $.cookie('userName', '');
+          location.href = "login.html";
+
+        }, function () {
+        });
+      });
+
       //执行一个laydate实例
       laydate.render({
         elem: '#dateStart' //指定元素
@@ -197,11 +219,6 @@
         elem: '#dateEnd' //指定元素
         , format: 'yyyy-MM-dd'
         , value: new Date()
-      });
-
-      //监听退出
-      $(document).on('click', '#logout', function () {
-        layer.msg('hello');
       });
 
       function renewTable() {
@@ -219,7 +236,7 @@
       //执行一个 table 实例
       table.render({
         elem: '#orderList'
-        , height: 420
+        , height: 'full-180', cellMinWidth: 80
         , url: urlOrderList //数据接口
         , method: 'get'
         , where: { beginDate: $("#dateStart").val(), endDate: $("#dateEnd").val(), isClose: '1' }

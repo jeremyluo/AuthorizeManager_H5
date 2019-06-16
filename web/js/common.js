@@ -32,3 +32,8 @@ var urlOrderList = host + '/data/v1/listOrderConfig';
 //更新订单信息
 var urlOrderUpdate = host + '/order/v1/updateOrderConfig';
 
+//报表
+//订单统计报表
+var urlReportCount = host + '/data/v1/listActivateCountTotal';
+//激活明细
+var urlReportDetail = host + '/data/v1/listActivateCount';

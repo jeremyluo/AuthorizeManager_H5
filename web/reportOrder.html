@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport"
     content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <title>报表订单统计</title>
+  <title>订单列表</title>
   <link rel="stylesheet" href="../layui/css/layui.css" media="all">
   <style>
     body {
@@ -31,13 +31,15 @@
       <!-- 头部区域（可配合layui已有的水平导航） -->
       <ul class="layui-nav layui-layout-left">
         <li class="layui-nav-item">
-          <a href="">订单列表</a>
+          <a href="main.html">订单列表</a>
         </li>
         <li class="layui-nav-item">
           <a href="customer.html">客户管理</a>
         </li>
         <li class="layui-nav-item">
-          <a href="javascript:;"><font color='white'>报表-订单统计</font></a>
+          <a href="javascript:;">
+            <font color='white'>报表-订单统计</font>
+          </a>
           <dl class="layui-nav-child">
             <dd>
               <a href="reportOrder.html">订单统计报表</a>
@@ -50,12 +52,11 @@
       </ul>
       <ul class="layui-nav layui-layout-right">
         <li class="layui-nav-item">
-          <a href="javascript:;">
-            <img src="http://t.cn/RCzsdCq" class="layui-nav-img">用户
+          <a href="javascript:;" id="user">用户
           </a>
         </li>
         <li class="layui-nav-item">
-          <a href="login.html" lay-filter="logout">退了</a>
+          <a lay-filter="logout" id='logout'>退了</a>
         </li>
       </ul>
     </div>
@@ -74,21 +75,13 @@
             lay-verify="select" class="layui-input">
           </select>
         </div>
-
-        <label class="layui-form-label"> 开始时间</label>
-        <div class="layui-input-inline">
-          <input type="text" name="dateStart" id="dateStart" required lay-verify="required" placeholder="请选择开始时间"
-            autocomplete="off" class="layui-input">
-        </div>
-
-        <label class="layui-form-label"> 结束时间</label>
-        <div class="layui-input-inline">
-          <input type="text" name="dateEnd" id="dateEnd" required lay-verify="required" placeholder="请选择结束时间"
-            autocomplete="off" class="layui-input">
-        </div>
       </div>
       <!-- 内容主体区域 -->
-      <table class="layui-hide" id="orderList" lay-filter="orderFunction"></table>
+      <table class="layui-hide" id="orderList" lay-filter="orderList"></table>
+
+      <script type="text/html" id="orderDetailBar">
+        <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+      </script>
     </div>
 
 
@@ -118,13 +111,7 @@
         , $ = layui.jquery
         , cookie = layui.cookie
         , laydate = layui.laydate;
-      // layer.msg('cookie='+$.cookie('the_cookie'));
 
-      function getDate() {
-        var date = new Date();
-        date.setFullYear(date.getFullYear() - 1);
-        return date;
-      }
       getCustomer();
       function getCustomer() {
         //获取客户列表
@@ -138,22 +125,30 @@
             $(".loading-box").show();
           },
           success: function (res) {
-            if (res.code = '0') {
+            if (res.code === '0') {
               var data = res.data;
               if (data != undefined && data != null && data != ""
                 && data.list != undefined && data.list != null && data.list != "") {
+                customerData = data.list;
                 var html = "";
                 for (var i = 0; i < data.list.length; i++) {
-                  if (i == 0) {
-                    html += "<option value=''>请选择</option>";
-                  } else {
-                    html += "<option value=" + data.list[i].companyId + ">" + data.list[i].companyName + "</option>";
-                  }
+                  html += "<option value=" + data.list[i].companyId + ">" + data.list[i].companyName + "</option>";
                 }
+                $("#customerNameSelect").empty();
                 $("#customerNameSelect").append(html);
+                selectId = 0;
+                renewTable();
               }
-            }
-            else {
+            } else if (res.code === '1003') {
+              layer.confirm(res.errorMessage + ',是否重新登录？', {
+                btn: ['重新登录', '算了'] //按钮
+              }, function () {
+                $.cookie('the_cookie', '');
+                $.cookie('userName', '');
+                location.href = "login.html";
+              }, function () {
+              });
+            } else {
               layer.msg('获取客户数据失败,msg=' + res.errorMessage);
             }
           },
@@ -162,33 +157,6 @@
             $(".loading-box").hide();
             if (textStatus == 'timeout') {
               layer.msg('接口超时');
-
-              var html = "";
-              var list = [{
-                "companyId": "9",
-                "companyName": "客户7",
-                "status": "1"
-              }, {
-                "companyId": "10",
-                "companyName": "客户9",
-                "status": "1"
-              }, {
-                "companyId": "12",
-                "companyName": "客户10",
-                "status": "1"
-              }];
-              for (var i = 0; i < list.length; i++) {
-                if (i == 0) {
-                  html += "<option value=''>请选择</option>";
-                } else {
-                  html += "<option value=" + list[i].companyId + ">" + list[i].companyName + "</option>";
-                }
-              }
-              $("#customerNameSelect").empty();
-              $("#customerNameSelect").append(html);
-
-              var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
-              parent.layer.close(index); //再执行关闭
             }
           },
           error: function (data) {
@@ -196,47 +164,54 @@
           }
         });
       }
-      $("#customerNameSelect").change(function(){
+
+      $("#customerNameSelect").on('change', function () {
         renewTable();
       });
 
-      //执行一个laydate实例
-      laydate.render({
-        elem: '#dateStart' //指定元素
-        , format: 'yyyy-MM-dd'
-        , value: getDate()
-      });
-      laydate.render({
-        elem: '#dateEnd' //指定元素
-        , format: 'yyyy-MM-dd'
-        , value: new Date()
+      $("#user").append($.cookie('userName'));
+
+      $("#logout").on('click', function () {
+        layer.confirm('是否确认退出登录？', {
+          btn: ['确认退出', '算了，再看看'] //按钮
+        }, function () {
+
+          $.ajax({
+            url: urlLogout,
+            method: 'post',
+            dataType: 'JSON',
+            headers: { token: $.cookie('the_cookie'), userName: $.cookie('userName') },
+            timeout: 10000
+          });
+
+          $.cookie('the_cookie', '');
+          $.cookie('userName', '');
+          location.href = "login.html";
+
+        }, function () {
+        });
       });
 
-      //监听提交
-      form.on('submit(logout)', function (data) {
-
-        location.href = "login.html";
-        return false;
-      });
-
-      function renewTable(){
-        table.reload("orderList",{
-          page:{curr:1},
-          where:{companyId:$("#customerNameSelect").val(),beginDate: $("#dateStart").val(), endDate: $("#dateEnd").val(), isClose: '1'}
+      function renewTable() {
+        table.reload("orderList", {
+          page: { curr: 1 },
+          where: {
+            companyId: $("#customerNameSelect").val()
+          }
         });
       }
 
       //执行一个 table 实例
-      table.render({
+      var tableOrderList = table.render({
         elem: '#orderList'
-        , height: 420
-        , url: urlOrderList //数据接口
+        , height: 'full-180', cellMinWidth: 80
+        , url: urlReportCount //数据接口
         , method: 'get'
-        , where: { beginDate: $("#dateStart").val(), endDate: $("#dateEnd").val(), isClose: '1' }
+        , where: { companyId: $("#customerNameSelect").val() }
         , headers: { token: $.cookie('the_cookie'), userName: $.cookie('userName') }
-        , title: '订单表'
+        , title: '订单列表'
+        , toolbar: 'null' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
         , page: true //开启分页
-        , toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
         , totalRow: false //开启合计行
         , limit: 100
         , limits: [10, 20, 50, 100]
@@ -247,83 +222,41 @@
         , parseData: function (res) { //res 即为原始返回的数据
           return {
             "code": res.code, //解析接口状态
-            "msg": "msg", //解析提示文本
-            "count": res.data.total, //解析数据长度
-            "data": res.data.list //解析数据列表
+            "msg": res.errorMessage, //解析提示文本
+            "count": res.data != null && res.data != '' ? res.data.total : 0, //解析数据长度
+            "data": res.data != null && res.data != '' ? res.data.list : '' //解析数据列表
           };
         }
         , cols: [[ //表头
-          { type: 'checkbox', fixed: 'left' }
+          { type: 'numbers' }
           , { field: 'companyName', title: '客户名', width: 120 }
           , { field: 'licenceCount', title: '总数', width: 70, sort: true, totalRow: true }
           , { field: 'activateCount', title: '已激活数', width: 100, sort: true }
           , { field: 'orderDate', title: '订单日期', width: 120, sort: true, totalRow: true }
-          , { field: 'key1', title: 'Key1', width: 300 }
-          , { field: 'orderId', title: '订单号', width: 260, sort: true, totalRow: true }
+          , { field: 'oneTimes', title: '激活一次数', width: 120 }
+          , { field: 'twoTimes', title: '激活两次数', width: 120 }
+          , { field: 'threeTimes', title: '激活三次以上', width: 120 }
+          , { field: 'orderId', title: '订单号', width: 220, sort: true, totalRow: true }
+          , { fixed: 'right', title: '操作', toolbar: '#orderDetailBar', width: 80 }
         ]]
+        , done: function (res, curr, count) {
+          //如果是异步请求数据方式，res即为你接口返回的信息。
+          //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+          console.log(res);
+        }
       });
 
-      //监听头工具栏事件
-      table.on('toolbar(orderFunction)', function (obj) {
-        var checkStatus = table.checkStatus(obj.config.id)
-          , data = checkStatus.data; //获取选中的数据
-        switch (obj.event) {
-          case 'add':
-            layer.msg('添加');
-            layer.open({
-              type: 2,
-              title: '订单添加',
-              content: ['orderAdd.html', 'no'],
-              area: ['400px', '500px'],
-              end: function () {
-                window.parent.layer.msg('新增后关闭成功');
-                table.reload('orderList', { page: { curr: 1 } });
-              }
-            });
-            break;
-          case 'update':
-            if (data.length === 0) {
-              // layer.msg('请选择一行');
-              layer.msg('cookie=' + $.cookie('the_cookie'));
-              layer.open({
-                type: 2,
-                title: '订单修改',
-                content: ['orderEdit.html?id=123&customerName=customer123&chipSn=SN123&licenceCount=100&dateStr=2019-06-06&key1=keykeykey1'],
-                area: ['400px', '500px'],
-                end: function () {
-                  window.parent.layer.msg('修改后关闭成功');
-                  table.reload('customerList', { page: { curr: 1 } });
-                }
-              });
-            } else if (data.length > 1) {
-              layer.msg('只能同时编辑一个');
-            } else {
-              layer.open({
-                type: 2,
-                title: '订单修改',
-                content: ['orderEdit.html?orderId=' + checkStatus.data[0].orderId
-                  + '&companyName=' + encodeURI(checkStatus.data[0].companyName)
-                  + '&licenceCount=' + checkStatus.data[0].licenceCount
-                  + '&orderDate=' + checkStatus.data[0].orderDate
-                  + '&checkStatus=' + checkStatus.data[0].checkStatus
-                  + '&key1=' + checkStatus.data[0].key1],
-                area: ['400px', '500px'],
-                end: function () {
-                  window.parent.layer.msg('修改后关闭成功');
-                  table.reload('orderList', { page: { curr: 1 } });
-                }
-              });
-            }
-            break;
-          case 'delete':
-            if (data.length === 0) {
-              layer.msg('请选择一行');
-            } else {
-              layer.msg('删除');
-            }
-            break;
-        };
+      //监听行工具事件
+      table.on('tool(orderList)', function (obj) {
+        var data = obj.data;
+        console.log(data)
+        if (obj.event === 'detail') {
+          location.href = "reportOrderDetail.html?orderId=" + data.orderId
+            + "&companyId=" + data.companyId
+            + "&companyName=" + data.companyName;
+        }
       });
+
     });
   </script>
 </body>
