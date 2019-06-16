@@ -37,6 +37,9 @@
           <a href="customer.html">客户管理</a>
         </li>
         <li class="layui-nav-item">
+          <a href="reportOrder.html">订单统计报表</a>
+        </li>
+        <!-- <li class="layui-nav-item">
           <a href="javascript:;">
             <font color='white'>报表-订单详情</font>
           </a>
@@ -48,7 +51,7 @@
               <a href="reportOrderDetail.html">订单详情报表</a>
             </dd>
           </dl>
-        </li>
+        </li> -->
       </ul>
       <ul class="layui-nav layui-layout-right">
         <li class="layui-nav-item">
@@ -203,7 +206,6 @@
           , { field: 'activateTimes', title: '授权次数', width: 100, sort: true }
           , { field: 'updateTime', title: '最后授权日期', width: 210, sort: true, totalRow: true }
           , { field: 'orderId', title: '订单号', width: 260, sort: true, totalRow: true }
-          , { fixed: 'right', title: '客户名', toolbar: '#orderDetailBar', width: 80 }
         ]]
         , done: function (res, curr, count) {
           //如果是异步请求数据方式，res即为你接口返回的信息。
